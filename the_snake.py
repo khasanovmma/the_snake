@@ -65,7 +65,7 @@ class Apple(GameObject):
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
-    def random_position(self, snake_positions: List[Tuple[int, int]]) -> None:
+    def randomize_position(self, snake_positions: List[Tuple[int, int]]) -> None:
         """Генерирует случайную позицию для яблока, избегая позиций змеи."""
         while True:
             random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
@@ -136,7 +136,7 @@ class Snake(GameObject):
         if self.next_direction:
             self.direction = self.next_direction
 
-    def random_position(self) -> Tuple[int, int]:
+    def randomize_position(self) -> Tuple[int, int]:
         """Возвращает случайное положение для размещения змеи на экране."""
         random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
         random_y = choice(range(0, SCREEN_HEIGHT, GRID_SIZE))
@@ -144,10 +144,11 @@ class Snake(GameObject):
 
     def reset(self) -> None:
         """Сбрасывает параметры змеи к начальному состоянию."""
-        self.positions = self.random_position()
+        self.positions = [self.randomize_position()]
         self.direction = choice(DIRECTIONS)
         self.last_position = None
         self.length = 0
+        self.SPEED = 5
 
 
 def handle_keys(snake: Snake) -> None:
@@ -194,7 +195,7 @@ def main() -> None:
         if apple.position in snake.positions:
             snake.length += 1
             snake.SPEED += 1
-            apple.random_position(snake.positions)
+            apple.randomize_position(snake.positions)
 
         if snake.get_head_position() in snake.positions[1:]:
             snake.PAUSED = True
