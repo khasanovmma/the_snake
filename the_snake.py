@@ -144,10 +144,11 @@ class Snake(GameObject):
 
     def reset(self) -> None:
         """Сбрасывает параметры змеи к начальному состоянию."""
-        self.positions = self.random_position()
+        self.positions = [self.random_position()]
         self.direction = choice(DIRECTIONS)
         self.last_position = None
         self.length = 0
+        self.SPEED = 5
 
 
 def handle_keys(snake: Snake) -> None:
