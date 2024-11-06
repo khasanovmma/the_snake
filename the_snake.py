@@ -1,3 +1,4 @@
+from random import choice
 import pygame
 
 
@@ -41,11 +42,39 @@ class Apple(GameObject):
     def __init__(self):
         super().__init__()
         self.body_color = APPLE_COLOR
+        self.position = self.random_position()
 
     def draw(self):
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
+    def random_position(self):
+        random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
+        random_y = choice(range(0, SCREEN_HEIGHT, GRID_SIZE))
+        return (random_x, random_y)
+
+
+class Snake(GameObject):
+    def __init__(self):
+        super().__init__()
+        self.body_color = SNAKE_COLOR
+        self.positions = [self.position]
+        self.last = None
+
+    def draw(self):
+        for position in self.positions[:-1]:
+            rect = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
+            pygame.draw.rect(screen, self.body_color, rect)
+            pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
+        head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
+        pygame.draw.rect(screen, self.body_color, head_rect)
+        pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
+
+        if self.last:
+            last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
+            pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
 
 def handle_keys(game_object):
@@ -67,11 +96,13 @@ def handle_keys(game_object):
 def main():
     pygame.init()
     apple = Apple()
+    snake = Snake()
 
     while True:
         clock.tick(SPEED)
         handle_keys(apple)
         apple.draw()
+        snake.draw()
         pygame.display.update()
 
 
