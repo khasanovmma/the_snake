@@ -65,7 +65,7 @@ class Apple(GameObject):
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
-    def randomize_position(self, snake_positions: List[Tuple[int, int]]) -> None:
+    def randomize_position(self, snake_positions: List[Tuple[int, int]]):
         """Генерирует случайную позицию для яблока, избегая позиций змеи."""
         while True:
             random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
