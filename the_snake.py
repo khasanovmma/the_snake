@@ -48,7 +48,6 @@ class Apple(GameObject):
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
 
-
 def handle_keys(game_object):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -68,13 +67,11 @@ def handle_keys(game_object):
 def main():
     pygame.init()
     apple = Apple()
-    snake = Snake()
 
     while True:
         clock.tick(SPEED)
         handle_keys(apple)
         apple.draw()
-        snake.draw()
         pygame.display.update()
 
 
