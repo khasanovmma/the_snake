@@ -42,17 +42,11 @@ class Apple(GameObject):
     def __init__(self):
         super().__init__()
         self.body_color = APPLE_COLOR
-        self.position = self.random_position()
 
     def draw(self):
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
-
-    def random_position(self):
-        random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
-        random_y = choice(range(0, SCREEN_HEIGHT, GRID_SIZE))
-        return (random_x, random_y)
 
 
 class Snake(GameObject):
