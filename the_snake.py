@@ -54,7 +54,6 @@ class GameObject:
 
         :param position: Координаты ячейки для отображения.
         """
-
         rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, self.body_color, rect)
         pg.draw.rect(screen, BORDER_COLOR, rect, 1)
