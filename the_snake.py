@@ -1,6 +1,7 @@
 from random import choice
 import pygame as pg
 import sys
+from typing import Optional
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
@@ -34,7 +35,7 @@ class GameObject:
 
     def __init__(
         self,
-        body_color: tuple,
+        body_color: Optional[tuple] = None,
         position: tuple[int, int] = SCREEN_CENTER,
     ) -> None:
         """
@@ -74,8 +75,8 @@ class Apple(GameObject):
 
     def __init__(
         self,
-        body_color: tuple,
-        occupied_positions: list[tuple[int, int]],
+        body_color: tuple = APPLE_COLOR,
+        occupied_positions: list[tuple[int, int]] = [SCREEN_CENTER],
     ) -> None:
         """Инициализация яблока с заданным начальным положением и цветом."""
         super().__init__(body_color)
@@ -102,7 +103,7 @@ class Snake(GameObject):
 
     def __init__(
         self,
-        body_color: tuple,
+        body_color: tuple = SNAKE_COLOR,
         position: tuple[int, int] = SCREEN_CENTER,
     ) -> None:
         """Инициализация змеи с начальным положением, направлением и длиной."""
@@ -193,8 +194,8 @@ def main() -> None:
     объекты змеи и яблока и обновляет экран.
     """
     pg.init()
-    snake = Snake(body_color=SNAKE_COLOR, position=SCREEN_CENTER)
-    apple = Apple(body_color=APPLE_COLOR, occupied_positions=snake.positions)
+    snake = Snake()
+    apple = Apple(occupied_positions=snake.positions)
 
     while True:
         clock.tick(snake.speed)
