@@ -144,7 +144,8 @@ class Snake(GameObject):
         )
         self.positions.insert(0, position)
         self.last_position = (
-            self.positions.pop() if len(self.positions) - 1 > self.length else None
+            self.positions.pop() if len(self.positions) - 1 > self.length 
+            else None
         )
 
     def update_direction(self) -> None:
