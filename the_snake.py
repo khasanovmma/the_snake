@@ -35,7 +35,7 @@ class GameObject:
     def __init__(
         self,
         body_color: tuple,
-        position: tuple[int, int] = None,
+        position: tuple[int, int] = SCREEN_CENTER,
     ) -> None:
         """
         Инициализация базового игрового объекта с заданным положением и цветом
@@ -53,6 +53,7 @@ class GameObject:
 
         :param position: Координаты ячейки для отображения.
         """
+
         rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, self.body_color, rect)
         pg.draw.rect(screen, BORDER_COLOR, rect, 1)
@@ -74,50 +75,50 @@ class Apple(GameObject):
     def __init__(
         self,
         body_color: tuple,
-        position: tuple[int, int] = None,
-        occupied_positions=(SCREEN_CENTER,),
+        occupied_positions: list[tuple[int, int]],
     ) -> None:
         """Инициализация яблока с заданным начальным положением и цветом."""
-        super().__init__(body_color, position)
+        super().__init__(body_color)
+
+        self.position = self.randomize_position(occupied_positions)
 
     def draw(self) -> None:
         """Рисует яблоко на экране в заданной позиции."""
         self.draw_cell(self.position)
 
-    def randomize_position(self, snake_positions: list[tuple[int, int]]):
+    def randomize_position(self, occupied_positions: list[tuple[int, int]]):
         """Генерирует случайную позицию для яблока, избегая позиций змеи."""
         while True:
             random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
             random_y = choice(range(0, SCREEN_HEIGHT, GRID_SIZE))
-            self.position = (random_x, random_y)
+            position = (random_x, random_y)
 
-            if self.position not in snake_positions:
-                break
+            if position not in occupied_positions:
+                return position
 
 
 class Snake(GameObject):
     """Класс, представляющий змею и управляющий её движением и положением."""
 
-    SPEED = 5
-
     def __init__(
         self,
         body_color: tuple,
-        position: tuple[int, int] = None,
+        position: tuple[int, int] = SCREEN_CENTER,
     ) -> None:
         """Инициализация змеи с начальным положением, направлением и длиной."""
         super().__init__(body_color, position=position)
         self.positions = [self.position]
-        self.direction = choice(DIRECTIONS)
+        self.direction = RIGHT
         self.last_position = None
-        self.length = 0
+        self.length = 29
         self.next_direction = None
         self.paused: bool = False
+        self.speed = 5
 
     def draw(self) -> None:
         """Рисует тело змеи и её голову на экране."""
         # Рисуем тело змеи
-        for position in self.positions[:-1]:
+        for position in self.positions:
             self.draw_cell(position)
 
         # Рисуем голову змеи
@@ -136,15 +137,14 @@ class Snake(GameObject):
         """Перемещает змею в текущем направлении и обновляет её позиции."""
         position_x, position_y = self.get_head_position()
         next_position_x, next_position_y = self.direction
-        self.position = (
+        position = (
             (position_x + (next_position_x * GRID_SIZE)) % SCREEN_WIDTH,
             (position_y + (next_position_y * GRID_SIZE)) % SCREEN_HEIGHT,
         )
-        self.positions.insert(0, self.position)
-        if len(self.positions) - 1 > self.length:
-            self.last_position = self.positions.pop()
-        else:
-            self.last_position = None
+        self.positions.insert(0, position)
+        self.last_position = (
+            self.positions.pop() if len(self.positions) - 1 > self.length else None
+        )
 
     def update_direction(self) -> None:
         """
@@ -154,19 +154,15 @@ class Snake(GameObject):
         if self.next_direction:
             self.direction = self.next_direction
 
-    def randomize_position(self) -> tuple[int, int]:
-        """Возвращает случайное положение для размещения змеи на экране."""
-        random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
-        random_y = choice(range(0, SCREEN_HEIGHT, GRID_SIZE))
-        return random_x, random_y
-
     def reset(self) -> None:
         """Сбрасывает параметры змеи к начальному состоянию."""
-        self.positions = [self.randomize_position()]
         self.direction = choice(DIRECTIONS)
+        self.position = SCREEN_CENTER
+        self.positions = [self.position]
         self.last_position = None
         self.length = 0
-        self.SPEED = 5
+        self.speed = 5
+        self.paused = True
 
 
 def handle_keys(snake: Snake) -> None:
@@ -189,7 +185,6 @@ def handle_keys(snake: Snake) -> None:
                 sys.exit()
             elif event.key == pg.K_RETURN:
                 snake.paused = False
-                screen.fill(BLACK_COLOR)
 
 
 def main() -> None:
@@ -198,13 +193,15 @@ def main() -> None:
     объекты змеи и яблока и обновляет экран.
     """
     pg.init()
-    apple = Apple(body_color=APPLE_COLOR)
-    snake = Snake(body_color=SNAKE_COLOR)
+    snake = Snake(body_color=SNAKE_COLOR, position=SCREEN_CENTER)
+    apple = Apple(body_color=APPLE_COLOR, occupied_positions=snake.positions)
+
     while True:
-        clock.tick(snake.SPEED)
+        clock.tick(snake.speed)
         handle_keys(snake)
 
-        if not snake.PAUSED:
+        if not snake.paused:
+            screen.fill(BLACK_COLOR)
             apple.draw()
             snake.draw()
             snake.move()
@@ -212,11 +209,11 @@ def main() -> None:
 
         if apple.position in snake.positions:
             snake.length += 1
-            snake.SPEED += 1
-            apple.randomize_position(snake.positions)
+            snake.speed += 1
+            apple.position = apple.randomize_position(snake.positions)
 
-        if snake.get_head_position() in snake.positions[1:]:
-            snake.PAUSED = True
+        elif snake.get_head_position() in snake.positions[1:]:
+            snake.paused = True
             font = pg.font.Font(None, 74)
             text = font.render("Game Over", True, WHITE_COLOR)
             score_text = pg.font.Font(None, 36).render(
