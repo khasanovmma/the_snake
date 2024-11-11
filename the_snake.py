@@ -33,19 +33,14 @@ clock = pg.time.Clock()
 class GameObject:
     """Базовый класс для игровых объектов, таких как яблоко и змея."""
 
-    def __init__(
-        self,
-        body_color: Optional[tuple] = None,
-        position: tuple[int, int] = SCREEN_CENTER,
-    ) -> None:
+    def __init__(self, body_color: Optional[tuple] = None) -> None:
         """
         Инициализация базового игрового объекта с заданным положением и цветом
         тела.
 
         :param body_color: Цвет тела объекта в формате RGB.
-        :param position: Начальное положение объекта.
         """
-        self.position = position
+        self.position = SCREEN_CENTER
         self.body_color = body_color
 
     def draw_cell(self, position: tuple) -> None:
@@ -79,8 +74,7 @@ class Apple(GameObject):
     ) -> None:
         """Инициализация яблока с заданным начальным положением и цветом."""
         super().__init__(body_color)
-
-        self.position = self.randomize_position(occupied_positions)
+        self.randomize_position(occupied_positions)
 
     def draw(self) -> None:
         """Рисует яблоко на экране в заданной позиции."""
@@ -91,26 +85,22 @@ class Apple(GameObject):
         while True:
             random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
             random_y = choice(range(0, SCREEN_HEIGHT, GRID_SIZE))
-            position = (random_x, random_y)
+            self.position = (random_x, random_y)
 
-            if position not in occupied_positions:
-                return position
+            if self.position not in occupied_positions:
+                break
 
 
 class Snake(GameObject):
     """Класс, представляющий змею и управляющий её движением и положением."""
 
-    def __init__(
-        self,
-        body_color: tuple = SNAKE_COLOR,
-        position: tuple[int, int] = SCREEN_CENTER,
-    ) -> None:
+    def __init__(self, body_color: tuple = SNAKE_COLOR) -> None:
         """Инициализация змеи с начальным положением, направлением и длиной."""
-        super().__init__(body_color, position=position)
+        super().__init__(body_color)
         self.positions = [self.position]
         self.direction = RIGHT
         self.last_position = None
-        self.length = 29
+        self.length = 0
         self.next_direction = None
         self.paused: bool = False
         self.speed = 5
@@ -208,10 +198,10 @@ def main() -> None:
             snake.move()
             snake.update_direction()
 
-        if apple.position in snake.positions:
+        if apple.position == snake.get_head_position():
             snake.length += 1
             snake.speed += 1
-            apple.position = apple.randomize_position(snake.positions)
+            apple.randomize_position(snake.positions)
 
         elif snake.get_head_position() in snake.positions[1:]:
             snake.paused = True
@@ -246,6 +236,7 @@ def main() -> None:
             )
             pg.display.flip()
             snake.reset()
+            apple.randomize_position(snake.positions)
 
         pg.display.update()
 
