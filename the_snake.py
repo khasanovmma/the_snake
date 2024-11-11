@@ -6,6 +6,7 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
+SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
 # Константы направлений
 UP: tuple[int, int] = (0, -1)
@@ -31,15 +32,13 @@ clock = pg.time.Clock()
 class GameObject:
     """Базовый класс для игровых объектов, таких как яблоко и змея."""
 
-    PAUSED: bool = False
-
-    def __init__(self) -> None:
+    def __init__(self, body_color: tuple) -> None:
         """
         Инициализация базового игрового объекта с заданным положением и цветом
         тела.
         """
-        self.position = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-        self.body_color = None
+        self.position = SCREEN_CENTER
+        self.body_color = body_color
 
     def draw(self) -> None:
         """
@@ -52,10 +51,9 @@ class GameObject:
 class Apple(GameObject):
     """Класс, представляющий яблоко на экране."""
 
-    def __init__(self) -> None:
+    def __init__(self, body_color: tuple) -> None:
         """Инициализация яблока с заданным начальным положением и цветом."""
-        super().__init__()
-        self.body_color = APPLE_COLOR
+        super().__init__(body_color)
         self.position = (SCREEN_WIDTH // 4, SCREEN_HEIGHT // 4)
 
     def draw(self) -> None:
@@ -81,15 +79,15 @@ class Snake(GameObject):
 
     SPEED = 5
 
-    def __init__(self) -> None:
+    def __init__(self, body_color: tuple) -> None:
         """Инициализация змеи с начальным положением, направлением и длиной."""
-        super().__init__()
-        self.body_color = SNAKE_COLOR
+        super().__init__(body_color)
         self.positions = [self.position]
         self.direction = choice(DIRECTIONS)
         self.last_position = None
         self.length = 0
         self.next_direction = None
+        self.paused: bool = False
 
     def draw(self) -> None:
         """Рисует тело змеи и её голову на экране."""
@@ -169,7 +167,7 @@ def handle_keys(snake: Snake) -> None:
                 pg.quit()
                 sys.exit()
             elif event.key == pg.K_RETURN:
-                snake.PAUSED = False
+                snake.paused = False
                 screen.fill(BLACK_COLOR)
 
 
@@ -179,8 +177,8 @@ def main() -> None:
     объекты змеи и яблока и обновляет экран.
     """
     pg.init()
-    apple = Apple()
-    snake = Snake()
+    apple = Apple(body_color=APPLE_COLOR)
+    snake = Snake(body_color=SNAKE_COLOR)
     while True:
         clock.tick(snake.SPEED)
         handle_keys(snake)
