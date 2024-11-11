@@ -32,46 +32,67 @@ clock = pg.time.Clock()
 class GameObject:
     """Базовый класс для игровых объектов, таких как яблоко и змея."""
 
-    def __init__(self, body_color: tuple) -> None:
+    def __init__(
+        self,
+        body_color: tuple,
+        position: tuple[int, int] = None,
+    ) -> None:
         """
         Инициализация базового игрового объекта с заданным положением и цветом
         тела.
+
+        :param body_color: Цвет тела объекта в формате RGB.
+        :param position: Начальное положение объекта.
         """
-        self.position = SCREEN_CENTER
+        self.position = position
         self.body_color = body_color
+
+    def draw_cell(self, position: tuple) -> None:
+        """
+        Отображает ячейку на экране по заданной позиции с цветом объекта.
+
+        :param position: Координаты ячейки для отображения.
+        """
+        rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
+        pg.draw.rect(screen, self.body_color, rect)
+        pg.draw.rect(screen, BORDER_COLOR, rect, 1)
 
     def draw(self) -> None:
         """
-        Метод для отображения объекта. Переопределяется в дочерних
-        классах.
+        Метод для отображения объекта. Должен быть реализован в
+
+        дочерних классах.
         """
-        pass
+        raise NotImplementedError(
+            "Метод draw() должен быть реализован в дочерних классах."
+        )
 
 
 class Apple(GameObject):
     """Класс, представляющий яблоко на экране."""
 
-    def __init__(self, body_color: tuple) -> None:
+    def __init__(
+        self,
+        body_color: tuple,
+        position: tuple[int, int] = None,
+        occupied_positions=(SCREEN_CENTER,),
+    ) -> None:
         """Инициализация яблока с заданным начальным положением и цветом."""
-        super().__init__(body_color)
-        self.position = (SCREEN_WIDTH // 4, SCREEN_HEIGHT // 4)
+        super().__init__(body_color, position)
 
     def draw(self) -> None:
         """Рисует яблоко на экране в заданной позиции."""
-        rect = pg.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-        pg.draw.rect(screen, self.body_color, rect)
-        pg.draw.rect(screen, BORDER_COLOR, rect, 1)
+        self.draw_cell(self.position)
 
     def randomize_position(self, snake_positions: list[tuple[int, int]]):
         """Генерирует случайную позицию для яблока, избегая позиций змеи."""
         while True:
             random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
             random_y = choice(range(0, SCREEN_HEIGHT, GRID_SIZE))
-            position = (random_x, random_y)
+            self.position = (random_x, random_y)
 
-            if position not in snake_positions:
-                self.position = position
-                return
+            if self.position not in snake_positions:
+                break
 
 
 class Snake(GameObject):
@@ -79,9 +100,13 @@ class Snake(GameObject):
 
     SPEED = 5
 
-    def __init__(self, body_color: tuple) -> None:
+    def __init__(
+        self,
+        body_color: tuple,
+        position: tuple[int, int] = None,
+    ) -> None:
         """Инициализация змеи с начальным положением, направлением и длиной."""
-        super().__init__(body_color)
+        super().__init__(body_color, position=position)
         self.positions = [self.position]
         self.direction = choice(DIRECTIONS)
         self.last_position = None
@@ -91,18 +116,14 @@ class Snake(GameObject):
 
     def draw(self) -> None:
         """Рисует тело змеи и её голову на экране."""
+        # Рисуем тело змеи
         for position in self.positions[:-1]:
-            rect = pg.Rect(position, (GRID_SIZE, GRID_SIZE))
-            pg.draw.rect(screen, self.body_color, rect)
-            pg.draw.rect(screen, BORDER_COLOR, rect, 1)
+            self.draw_cell(position)
 
-        head_rect = pg.Rect(
-            self.get_head_position(),
-            (GRID_SIZE, GRID_SIZE),
-        )
-        pg.draw.rect(screen, self.body_color, head_rect)
-        pg.draw.rect(screen, BORDER_COLOR, head_rect, 1)
+        # Рисуем голову змеи
+        self.draw_cell(self.get_head_position())
 
+        # Очистка последней позиции хвоста
         if self.last_position:
             last_rect = pg.Rect(self.last_position, (GRID_SIZE, GRID_SIZE))
             pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
