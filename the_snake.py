@@ -1,7 +1,6 @@
 from random import choice
 import pygame as pg
 import sys
-from typing import List, Tuple
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
@@ -9,11 +8,11 @@ GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
 
 # Константы направлений
-UP: Tuple[int, int] = (0, -1)
-DOWN: Tuple[int, int] = (0, 1)
-LEFT: Tuple[int, int] = (-1, 0)
-RIGHT: Tuple[int, int] = (1, 0)
-DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
+UP: tuple[int, int] = (0, -1)
+DOWN: tuple[int, int] = (0, 1)
+LEFT: tuple[int, int] = (-1, 0)
+RIGHT: tuple[int, int] = (1, 0)
+DIRECTIONS: tuple[tuple[int, int]] = (UP, DOWN, LEFT, RIGHT)
 
 # Цвета
 BOARD_BACKGROUND_COLOR = (0, 0, 0)
@@ -65,7 +64,7 @@ class Apple(GameObject):
         pg.draw.rect(screen, self.body_color, rect)
         pg.draw.rect(screen, BORDER_COLOR, rect, 1)
 
-    def randomize_position(self, snake_positions: List[Tuple[int, int]]):
+    def randomize_position(self, snake_positions: list[tuple[int, int]]):
         """Генерирует случайную позицию для яблока, избегая позиций змеи."""
         while True:
             random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
@@ -110,7 +109,7 @@ class Snake(GameObject):
             last_rect = pg.Rect(self.last_position, (GRID_SIZE, GRID_SIZE))
             pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
-    def get_head_position(self) -> Tuple[int, int]:
+    def get_head_position(self) -> tuple[int, int]:
         """Возвращает позицию головы змеи."""
         return self.positions[0]
 
@@ -136,7 +135,7 @@ class Snake(GameObject):
         if self.next_direction:
             self.direction = self.next_direction
 
-    def randomize_position(self) -> Tuple[int, int]:
+    def randomize_position(self) -> tuple[int, int]:
         """Возвращает случайное положение для размещения змеи на экране."""
         random_x = choice(range(0, SCREEN_WIDTH, GRID_SIZE))
         random_y = choice(range(0, SCREEN_HEIGHT, GRID_SIZE))
